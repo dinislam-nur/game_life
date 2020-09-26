@@ -1,7 +1,7 @@
-package ru.innopolis.student.dinislam.game.singlethread.impl;
+package ru.innopolis.student.dinislam.game.impl;
 
 import lombok.RequiredArgsConstructor;
-import ru.innopolis.student.dinislam.game.singlethread.api.Game;
+import ru.innopolis.student.dinislam.game.api.Game;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,14 +21,16 @@ public class Life implements Game {
 
         final Court court = new Court(sizeCourt);
         court.draw(cells);
-        System.out.println(System.lineSeparator());
         for (int i = 0; i < numberOfCycle; i++) {
-            newGeneration = new CycleOfLife(cells, sizeCourt).startCycle();
-            if (cells.isEmpty() || cells.equals(newGeneration)) {
-                break;
+            if (cells.size() < 50) {
+                newGeneration = new CycleOfLife(cells, sizeCourt).startCycle();
+            } else {
+                newGeneration = new CycleOfLife(cells, sizeCourt).startConcurrentCycle();
             }
             court.draw(newGeneration);
-            System.out.println(System.lineSeparator());
+            if (newGeneration.isEmpty() || cells.equals(newGeneration)) {
+                break;
+            }
             cells = newGeneration;
         }
     }

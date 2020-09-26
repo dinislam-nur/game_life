@@ -1,4 +1,4 @@
-package ru.innopolis.student.dinislam.game.singlethread.impl;
+package ru.innopolis.student.dinislam.game.impl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RequiredArgsConstructor
 public class CycleOfLife {
@@ -14,13 +18,41 @@ public class CycleOfLife {
 
     private final int sizeCourt;
 
-    private final Map<Integer, Set<Integer>> newGeneration = new HashMap<>();
+    private Map<Integer, Set<Integer>> newGeneration;
 
 
     public Map<Integer, Set<Integer>> startCycle() {
+
+        newGeneration = new HashMap<>();
+
         oldGeneration.forEach(
                 (coordinateX, value) -> value.forEach(
                         coordinateY -> processCell(coordinateX, coordinateY, true)));
+
+        return newGeneration;
+    }
+
+    public Map<Integer, Set<Integer>> startConcurrentCycle() {
+        newGeneration = new ConcurrentHashMap<>();
+
+        try {
+            final ExecutorService service = Executors.newFixedThreadPool(8);
+            final CountDownLatch latch = new CountDownLatch(oldGeneration.size());
+
+            oldGeneration.forEach(
+                    (coordinateX, value) ->
+                            service.execute(() -> {
+                                value.forEach(
+                                        coordinateY -> processCell(coordinateX, coordinateY, true));
+                                latch.countDown();
+                            }));
+
+            latch.await();
+            service.shutdown();
+        } catch (InterruptedException e) {
+            System.out.println("Thread is interrupted");
+            e.printStackTrace();
+        }
 
         return newGeneration;
     }

@@ -1,4 +1,4 @@
-package ru.innopolis.student.dinislam.game.singlethread.impl;
+package ru.innopolis.student.dinislam.game.impl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +25,7 @@ public class Court {
             }
             System.out.print(System.lineSeparator());
         }
+        System.out.println(System.lineSeparator());
     }
 
     private void fillCourt(char[][] court) {
