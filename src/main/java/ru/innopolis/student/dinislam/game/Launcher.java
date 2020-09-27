@@ -2,34 +2,30 @@ package ru.innopolis.student.dinislam.game;
 
 
 import ru.innopolis.student.dinislam.game.api.Game;
+import ru.innopolis.student.dinislam.game.configuration_processing.api.ConfigurationProcessor;
+import ru.innopolis.student.dinislam.game.configuration_processing.impl.ConfigurationProcessorImpl;
 import ru.innopolis.student.dinislam.game.impl.Life;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 public class Launcher {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        Map<Integer, Set<Integer>> initConf = new HashMap<>();
+        final String resourcePath = args[0];
+        final String outputDirectory = args[1];
 
-        initConf.put(0, new HashSet<Integer>() {{
-            add(8);
-        }});
-        initConf.put(1, new HashSet<Integer>() {{
-            add(7);
-        }});
-        initConf.put(2, new HashSet<Integer>() {{
-            add(7);
-            add(8);
-            add(9);
-        }});
+        final ConfigurationProcessor configurationProcessor = new ConfigurationProcessorImpl();
+        configurationProcessor.readFrom(resourcePath);
 
-        final int sizeCourt = 10;
-        final int numberOfCycle = 100;
-        final Game life = new Life(initConf, sizeCourt, numberOfCycle);
-        life.start();
+        final Game life = new Life(configurationProcessor.getInitialCells(),
+                configurationProcessor.getLengthOfCourt(),
+                configurationProcessor.getNumberOfCycles());
+
+        final Map<Integer, Set<Integer>> result = life.start();
+        configurationProcessor.setResultCells(result);
+        configurationProcessor.writeTo(outputDirectory);
     }
 }
